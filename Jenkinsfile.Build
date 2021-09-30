@@ -5,16 +5,29 @@ pipeline {
       steps {
         sh '''
           pip3 install pytest
-          pytest pytest_test.py
+          pytest pytest/
         '''
+      }
+      post {
+        success {
+          sh '''
+            docker build -t sachinbhuibar/firstapp -f Dockerfile.firstapp .
+            docker build -t sachinbhuibar/secondapp -f Dockerfile.secondapp .
+          '''
+          withCredentials([usernamePassword(credentialsId: 'docker-hub-credential', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+            sh '''
+              docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+              docker push sachinbhuibar/firstapp
+              docker push sachinbhuibar/secondapp
+            '''
+          }
+        }
       }
     }
   }
   post {
     success {
-      sh '''
-        echo SUCCESS
-      '''
+      echo 'SUCCESS'
     }
   }
 }
