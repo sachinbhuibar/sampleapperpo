@@ -1,0 +1,7 @@
+FROM python
+RUN pip install flask
+RUN mkdir app
+WORKDIR /app
+COPY first-app.py first-app.py
+EXPOSE 3000
+CMD ["python", "first-app.py"]
