@@ -1,0 +1,20 @@
+pipeline {
+  agent any
+  stages {
+    stage ("Unit Test") {
+      steps {
+        sh '''
+          pip3 install pytest
+          pytest pytest_test.py
+        '''
+      }
+    }
+  }
+  post {
+    success {
+      sh '''
+        echo SUCCESS
+      '''
+    }
+  }
+}
