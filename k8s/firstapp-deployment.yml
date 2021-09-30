@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firstapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firstapp
+  template:
+    metadata:
+      labels:
+        app: firstapp
+    spec:
+      containers:
+        - name: firstapp
+          image: sachinbhuibar/firstapp
+          ports:
+            - containerPort: 3000
