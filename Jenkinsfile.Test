@@ -1,0 +1,30 @@
+pipeline {
+  agent any
+  stages {
+    stage ("Deploy Test") {
+      steps {
+        withKubeConfig([credentialsId: 'k8s-credentials', serverUrl: 'https://192.168.49.2:8443']) {
+          sh 'kubectl apply -f k8s/ -n jenkins'
+        }
+      }
+      post {
+        success {
+          sh '''
+            /home/sachinbhuibar/apache-jmeter-5.4.1/bin/jmeter -j jmeter.save.saveservice.output_format=xml -n -t Jenkins.io.jmx -l Jenkins.io.report.jtl
+          '''
+          perfReport filterRegex: '', showTrendGraphs: true, sourceDataFiles: 'Jenkins.io.report.jtl'
+        }
+      }
+    }
+  }
+  post {
+    success {
+      echo 'SUCCESS'
+    }
+    always {
+      withKubeConfig([credentialsId: 'k8s-credentials', serverUrl: 'https://192.168.49.2:8443']) {
+        sh 'kubectl delete -f k8s/ -n jenkins'
+      }
+    }
+  }
+}
