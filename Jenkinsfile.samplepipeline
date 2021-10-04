@@ -1,0 +1,37 @@
+pipeline {
+  agent any
+  stages {
+    stage("Start Deploy") {
+      steps {
+        echo "Do you want to deploy?"
+        withCredentials([string(credentialsId: 'openshift-credentials', variable: 'TOKEN')]) {
+          sh '''
+            oc login --token=${TOKEN} --server=https://api.sandbox-m2.ll9k.p1.openshiftapps.com:6443
+            oc get pods
+          '''
+        }
+      }
+    }
+    stage ("Deploy Test") {
+      input {
+        message 'Ready to deploy?'
+        ok 'Sure'
+      }
+      steps {
+        withKubeConfig([credentialsId: 'k8s-credentials', serverUrl: 'https://192.168.49.2:8443']) {
+          sh 'kubectl apply -f k8s/ -n jenkins'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      sh '''
+        sleep 10
+      '''
+      withKubeConfig([credentialsId: 'k8s-credentials', serverUrl: 'https://192.168.49.2:8443']) {
+        sh 'kubectl delete -f k8s/ -n jenkins'
+      }
+    }
+  }
+}
