@@ -1,6 +1,13 @@
 pipeline {
   agent any
   stages {
+    stage ("Code Style") {
+      steps {
+        sh '''
+          pycodestyle first-app.py second-app.py
+        '''
+      }
+    }
     stage ("Unit Test") {
       steps {
         sh '''
